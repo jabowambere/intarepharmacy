@@ -32,7 +32,5 @@
       "last 1 safari version"
     ]
   },
-  "engines": {
-    "node": "24.x"
-  }
+  "engines": { "node": "24.x" }
 }
