@@ -8,28 +8,37 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('pharmacist');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     if (!email || !password) {
       setError('Please fill in all fields');
+      setLoading(false);
       return;
     }
 
-    const success = login(email, password, role);
-    
-    if (success) {
-      if (role === 'admin') {
-        navigate('/admin');
+    try {
+      const success = await login(email, password, role);
+      
+      if (success) {
+        if (role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/pharmacist');
+        }
       } else {
-        navigate('/pharmacist');
+        setError('Invalid credentials. Please try again.');
+        setLoading(false);
       }
-    } else {
-      setError('Invalid credentials. Please try again.');
+    } catch (error) {
+      setError('Login failed. Please try again.');
+      setLoading(false);
     }
   };
 
@@ -88,8 +97,8 @@ const Login = () => {
               <p>Contact the Administrator</p>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-block">
-              Sign In
+            <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
         </div>

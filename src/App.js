@@ -10,6 +10,7 @@ import About from './pages/About.jsx';
 import Contact from './pages/Contact.jsx';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import './App.css';
 
 const ConditionalNavbar = () => {
@@ -84,6 +85,7 @@ function App() {
           <ConditionalNavbar />
           <AppRoutes />
           <ConditionalFooter />
+          <ScrollToTop />
         </div>
       </Router>
     </AuthProvider>

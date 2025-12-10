@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import StockAlerts from '../components/StockAlerts';
 import ModernAlert from '../components/ModernAlert';
+import Loader from '../components/Loader';
+import PageTransition from '../components/PageTransition';
 import './Dashboard.css';
 
 const PharmacistDashboard = () => {
@@ -24,6 +26,7 @@ const PharmacistDashboard = () => {
     image: '',
   });
   const [alertConfig, setAlertConfig] = useState({ isOpen: false });
+  const [loading, setLoading] = useState(true);
 
   // Fetch orders from backend
   const fetchOrders = async () => {
@@ -53,8 +56,12 @@ const PharmacistDashboard = () => {
 
   // Fetch data on component mount
   React.useEffect(() => {
-    fetchMedicines();
-    fetchOrders();
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchMedicines(), fetchOrders()]);
+      setTimeout(() => setLoading(false), 1000);
+    };
+    loadData();
   }, []);
 
   const alerts = getStockAlerts();
@@ -211,7 +218,10 @@ const PharmacistDashboard = () => {
     });
   };
 
+  if (loading) return <Loader />;
+
   return (
+    <PageTransition>
     <div className="dashboard">
       <div className="dashboard-topbar">
         <div className="container">
@@ -220,7 +230,7 @@ const PharmacistDashboard = () => {
             <div className="user-logout-section">
               <span className="user-name-display">{user?.name}</span>
               <button onClick={handleLogout} className="btn-logout-dashboard">
-                <span className="logout-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
+                <span className="logout-icon"><i className="fa-solid fa-arrow-right-from-bracket"></i></span>
                 Logout
               </button>
             </div>
@@ -566,6 +576,7 @@ const PharmacistDashboard = () => {
         />
       </div>
     </div>
+    </PageTransition>
   );
 };
 

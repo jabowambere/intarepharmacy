@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import StockAlerts from '../components/StockAlerts';
+import Loader from '../components/Loader';
+import PageTransition from '../components/PageTransition';
 import './Dashboard.css';
 
 const AdminDashboard = () => {
@@ -9,6 +11,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [contacts, setContacts] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const handleLogout = () => {
     logout();
@@ -28,6 +31,7 @@ const AdminDashboard = () => {
   // Fetch data from backend
   React.useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       const apiUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
       try {
         // Fetch contacts
@@ -45,9 +49,11 @@ const AdminDashboard = () => {
         }
         
         // Fetch medicines
-        fetchMedicines();
+        await fetchMedicines();
       } catch (error) {
         console.error('Failed to fetch data:', error);
+      } finally {
+        setTimeout(() => setLoading(false), 1000);
       }
     };
     fetchData();
@@ -128,7 +134,10 @@ const AdminDashboard = () => {
     });
   };
 
+  if (loading) return <Loader />;
+
   return (
+    <PageTransition>
     <div className="dashboard">
       <div className="dashboard-topbar">
         <div className="container">
@@ -137,7 +146,7 @@ const AdminDashboard = () => {
             <div className="user-logout-section">
               <span className="user-name-display">{user?.name}</span>
               <button onClick={handleLogout} className="btn-logout-dashboard">
-                <span className="logout-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
+                <span className="logout-icon"><i className="fa-solid fa-arrow-right-from-bracket"></i></span>
                 Logout
               </button>
             </div>
@@ -233,7 +242,7 @@ const AdminDashboard = () => {
               </thead>
               <tbody>
                 {pharmacists.length === 0 ? (
-                  <tr>
+                  <tr key="empty-pharmacists">
                     <td colSpan="5" className="empty-state">
                       No pharmacists found. Add one to get started.
                     </td>
@@ -283,14 +292,14 @@ const AdminDashboard = () => {
               </thead>
               <tbody>
                 {contacts.length === 0 ? (
-                  <tr>
+                  <tr key="empty-contacts">
                     <td colSpan="4" className="empty-state">
                       No contact messages yet.
                     </td>
                   </tr>
                 ) : (
-                  contacts.map(contact => (
-                    <tr key={contact._id || contact.id}>
+                  contacts.map((contact, index) => (
+                    <tr key={contact._id || contact.id || `contact-${index}`}>
                       <td>{contact.name}</td>
                       <td>{contact.email}</td>
                       <td>
@@ -381,6 +390,7 @@ const AdminDashboard = () => {
         )}
       </div>
     </div>
+    </PageTransition>
   );
 };
 

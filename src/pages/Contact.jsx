@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Loader from '../components/Loader';
+import PageTransition from '../components/PageTransition';
 import './Contact.css';
 
 const Contact = () => {
@@ -9,6 +11,11 @@ const Contact = () => {
     message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => setLoading(false), 1200);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -27,7 +34,10 @@ const Contact = () => {
     }, 3000);
   };
 
+  if (loading) return <Loader />;
+
   return (
+    <PageTransition>
     <div className="contact-page">
       <div className="container">
         <div className="contact-header">
@@ -124,6 +134,7 @@ const Contact = () => {
         </div>
       </div>
     </div>
+    </PageTransition>
   );
 };
 

@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import Loader from '../components/Loader';
+import PageTransition from '../components/PageTransition';
 import './About.css';
 
 const About = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => setLoading(false), 1200);
+  }, []);
+
+  if (loading) return <Loader />;
+
   return (
+    <PageTransition>
     <div className="about-page">
       <div className="container">
         <div className="about-hero">
@@ -71,6 +82,7 @@ const About = () => {
         </div>
       </div>
     </div>
+    </PageTransition>
   );
 };
 

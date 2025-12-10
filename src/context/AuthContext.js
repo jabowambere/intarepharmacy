@@ -56,28 +56,45 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('orders', JSON.stringify(orders));
   }, [orders]);
 
-  const login = (email, password, role) => {
-    let userData = null;
-    
-    if (role === 'admin') {
-      // Default admin credentials
-      if (email === 'admin@pharmacy.com' && password === 'admin123') {
-        userData = { id: 0, email, role: 'admin', name: 'Admin User' };
-        localStorage.setItem('adminUser', JSON.stringify(userData));
+  const login = async (email, password, role) => {
+    const normalizedEmail = email?.trim().toLowerCase();
+    const apiUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+
+    try {
+      const res = await fetch(`${apiUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalizedEmail, password, role }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('token', data.token);
+        return true;
       }
-    } else if (role === 'pharmacist') {
-      // Check pharmacist credentials
-      const pharmacist = pharmacists.find(p => p.email === email);
-      if (pharmacist && password === 'pharmacist123') {
-        userData = { id: pharmacist.id, email, role: 'pharmacist', name: pharmacist.name };
+      return false;
+    } catch (err) {
+      console.error('Backend not available, using fallback login:', err);
+      // Fallback to local authentication
+      let userData = null;
+      
+      if (role === 'admin' && normalizedEmail === 'admin@pharmacy.com' && password === 'admin123') {
+        userData = { id: 'admin', email: normalizedEmail, role: 'admin', name: 'Admin User' };
+      } else if (role === 'pharmacist' && password === 'pharmacist123') {
+        const pharmacist = pharmacists.find(p => p.email.toLowerCase() === normalizedEmail);
+        if (pharmacist) {
+          userData = { id: pharmacist.id, email: normalizedEmail, role: 'pharmacist', name: pharmacist.name };
+        }
       }
+      
+      if (userData) {
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        return true;
+      }
+      return false;
     }
-    
-    if (userData) {
-      setUser(userData);
-      return true;
-    }
-    return false;
   };
 
   const logout = () => {

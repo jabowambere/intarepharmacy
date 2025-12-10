@@ -1,15 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import MedicineCard from '../components/MedicineCard';
 import StockAlerts from '../components/StockAlerts';
+import Loader from '../components/Loader';
+import PageTransition from '../components/PageTransition';
 import avatarImg from './avatar.png';
 import './Home.css';
 
 const Home = () => {
-  const { medicines, getStockAlerts } = useAuth();
+  const { medicines, getStockAlerts, fetchMedicines } = useAuth();
   const alerts = getStockAlerts();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      await fetchMedicines();
+      setTimeout(() => setLoading(false), 1000);
+    };
+    loadData();
+  }, []);
+
+  if (loading) return <Loader />;
 
   return (
+    <PageTransition>
     <div className="home">
       <section className="hero">
         <div className="container">
@@ -70,6 +85,7 @@ const Home = () => {
         </div>
       </section>
     </div>
+    </PageTransition>
   );
 };
 
